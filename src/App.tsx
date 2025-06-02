@@ -1,33 +1,43 @@
-import { move, type Cell, initialGameState } from './game/game.ts'
+import { move, type Cell, initialGameState, checkEndgame } from './game/game.ts'
 import { useState } from 'react'
 import './App.css'
 
 function App() {
   const [game, setGame] = useState(initialGameState)
-  const [selectedCell, setSelectedCell] = useState([])
+  const [gameOver, setGameOver] = useState(false)
+  const [message, setMessage] = useState(game.currentPlayer + 'turn')
 
   const makeMove = (row: number, col: number) => {
     setGame(move(game, row, col))
+    if (checkEndgame(game)) setGameOver(true)
+    if (game.status === 'in-progress') {
+      setMessage(game.currentPlayer)
+    } else {
+      setMessage('Tie')
+    }
   }
 
-  const render = (col: Cell[], rowIndex: number) => {
+  const renderCells = (col: Cell[], rowIndex: number) => {
     return (
       <div>
         {col.map((cell: Cell, colIndex: number) => {
           return (
-            <button onClick={() => makeMove(rowIndex, colIndex)}>
+            <button disabled={gameOver} onClick={() => makeMove(rowIndex, colIndex)}>
               {JSON.stringify(cell)}
             </button>
           )
-        })}
-      </div>
+        })
+        }
+      </div >
     )
   }
 
   return (
     <>
       <h2>Tic-Tac-Toe</h2>
-      {game.board.map(render)}
+      {game.board.map(renderCells)}
+      <p>{message}</p>
+      <p></p>
     </>
   )
 }
